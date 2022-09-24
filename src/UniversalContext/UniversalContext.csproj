@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>Universal.Context</PackageId>
+    <Version>1.0.20</Version>
+    <Authors>Camilo Chaves</Authors>
+    <Title>UniversalContext</Title>
+    <Description>
+      This library enables the user to work with any Context. The advantage is to enable the possibility to perform CRUDs on any DbSet by calling it with a string name.
+      See more notes on https://github.com/camilochaves/EFCoreCRUDByReflection.git
+      Where conditions are based on System.Linq.Dynamic.Core package!
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+    <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.20" />
+  </ItemGroup>
+
+</Project>
