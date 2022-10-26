@@ -7,21 +7,21 @@ using Newtonsoft.Json;
 namespace Universal.Context;
 public partial class UniversalContext
 {
-    private readonly DbContext _context;
+    public DbContext Context {get; init;}
     public UniversalContext(DbContext context)
     {
-        this._context = context;
+        this.Context = context;
     }
 
-//USAGE 
-//var result = Helper.RawSqlQuery(
-//     "SELECT TOP 10 Name, COUNT(*) FROM Users U"
-//     + " INNER JOIN Signups S ON U.UserId = S.UserId"
-//     + " GROUP BY U.Name ORDER BY COUNT(*) DESC",
-//     x => new TopUser { Name = (string)x[0], Count = (int)x[1] });
+    //USAGE 
+    //var result = Helper.RawSqlQuery(
+    //     "SELECT TOP 10 Name, COUNT(*) FROM Users U"
+    //     + " INNER JOIN Signups S ON U.UserId = S.UserId"
+    //     + " GROUP BY U.Name ORDER BY COUNT(*) DESC",
+    //     x => new TopUser { Name = (string)x[0], Count = (int)x[1] });
     public List<T> RawSqlQuery<T>(string query, Func<DbDataReader, T> map, CommandType commandType = CommandType.Text)
     {
-        using var context = _context;
+        using var context = Context;
         using var command = context.Database.GetDbConnection().CreateCommand();
         command.CommandText = query;
         command.CommandType = commandType;
@@ -41,7 +41,7 @@ public partial class UniversalContext
     public object Add<T>(object obj) where T : class
     {
         var convertedObj = (T)obj;
-        _context.Add(convertedObj);
+        Context.Add(convertedObj);
         return convertedObj;
     }
 
@@ -50,13 +50,13 @@ public partial class UniversalContext
         var dbSetType = DbSetUnderlyingType(dbSetName);
         if (dbSetType is null) throw new Exception("DbSet type cannot be null!");
         var convertedObj = Convert.ChangeType(obj, dbSetType);
-        _context.Add(convertedObj);
+        Context.Add(convertedObj);
         return convertedObj;
     }
     public async Task<object> AddAsync<T>(object obj) where T : class
     {
         var convertedObj = (T)obj;
-        await _context.AddAsync(convertedObj);
+        await Context.AddAsync(convertedObj);
         return convertedObj;
     }
 
@@ -65,13 +65,13 @@ public partial class UniversalContext
         var dbSetType = DbSetUnderlyingType(dbSetName);
         if (dbSetType is null) throw new Exception("DbSet type cannot be null!");
         var convertedObj = Convert.ChangeType(obj, dbSetType);
-        await _context.AddAsync(convertedObj);
+        await Context.AddAsync(convertedObj);
         return convertedObj;
     }
     public object Remove<T>(object obj) where T : class
     {
         var convertedObj = (T)obj;
-        _context.Set<T>().Remove(convertedObj);
+        Context.Set<T>().Remove(convertedObj);
         return convertedObj;
     }
 
@@ -80,7 +80,7 @@ public partial class UniversalContext
         var dbSetType = DbSetUnderlyingType(dbSetName);
         if (dbSetType is null) throw new Exception("DbSet type cannot be null!");
         var convertedObj = Convert.ChangeType(obj, dbSetType);
-        _context.Remove(convertedObj);
+        Context.Remove(convertedObj);
         return convertedObj;
     }
     public IEnumerable<object> Remove<T>(Expression<Func<T, bool>> p) where T : class
@@ -88,8 +88,8 @@ public partial class UniversalContext
         try
         {
             var pred = p.Compile();
-            var objs = _context.Set<T>().Where(p);
-            _context.Set<T>().RemoveRange(objs);
+            var objs = Context.Set<T>().Where(p);
+            Context.Set<T>().RemoveRange(objs);
             return objs;
         }
         catch (Exception)
@@ -110,7 +110,7 @@ public partial class UniversalContext
             {
                 convertedObjects.Add(Convert.ChangeType(obj, dbSetType));
             }
-            _context.RemoveRange(convertedObjects);
+            Context.RemoveRange(convertedObjects);
             return convertedObjects;
         }
         catch (Exception)
@@ -123,7 +123,7 @@ public partial class UniversalContext
         try
         {
             var pred = p.Compile();
-            return _context.Set<T>().Where(p).AsEnumerable<T>().SingleOrDefault();
+            return Context.Set<T>().Where(p).AsEnumerable<T>().SingleOrDefault();
         }
         catch (Exception)
         {
@@ -144,11 +144,11 @@ public partial class UniversalContext
         }
     }
 
-    public object? Find(Type entityType, params object?[] keys) => _context.Find(entityType, keys);
+    public object? Find(Type entityType, params object?[] keys) => Context.Find(entityType, keys);
     public T Update<T>(object obj) where T : class
     {
         var convertedObj = (T)obj;
-        _context.Set<T>().Update(convertedObj);
+        Context.Set<T>().Update(convertedObj);
         return convertedObj;
     }
 
@@ -159,14 +159,14 @@ public partial class UniversalContext
             target = Convert.ChangeType(target, dbSetType);
             if (target is null) throw new Exception("Update error! Target cannot be null");
         }
-        _context.Entry(target).State = EntityState.Modified;
+        Context.Entry(target).State = EntityState.Modified;
         Copy(ref target, source, keyNames);
         return target;
     }
 
     private object Update(Type dbSetType, object target, ExpandoObject source, IEnumerable<string>? keyNames = null)
     {
-        _context.Entry(target).State = EntityState.Modified;
+        Context.Entry(target).State = EntityState.Modified;
         foreach (var item in source as IDictionary<string, object>)
         {
             if (keyNames?.Contains(item.Key) ?? false) continue;
@@ -251,7 +251,7 @@ public partial class UniversalContext
         try
         {
             string direction = descending ? "desc" : "asc";
-            return _context.Set<T>().OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count).AsEnumerable<T>();
+            return Context.Set<T>().OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count).AsEnumerable<T>();
         }
         catch (Exception)
         {
@@ -264,7 +264,7 @@ public partial class UniversalContext
         try
         {
             var prop = GetProperty(dbSetName);
-            IQueryable<object>? collection = prop?.GetGetMethod()?.Invoke(_context, null) as IQueryable<object>;
+            IQueryable<object>? collection = prop?.GetGetMethod()?.Invoke(Context, null) as IQueryable<object>;
             string direction = descending ? "desc" : "asc";
             return collection?.OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
         }
@@ -278,7 +278,7 @@ public partial class UniversalContext
         try
         {
             string direction = descending ? "desc" : "asc";
-            return _context.Set<T>().Where(where).OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count).AsEnumerable<T>();
+            return Context.Set<T>().Where(where).OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count).AsEnumerable<T>();
         }
         catch (Exception)
         {
@@ -300,13 +300,13 @@ public partial class UniversalContext
     public IQueryable<object>? GetAll(string dbSetName)
     {
         var prop = GetProperty(dbSetName);
-        return prop?.GetGetMethod()?.Invoke(_context, null) as IQueryable<object>;
+        return prop?.GetGetMethod()?.Invoke(Context, null) as IQueryable<object>;
     }
-    public IQueryable<object>? Query<T>(string where) where T : class => _context.Set<T>().Where(where);
+    public IQueryable<object>? Query<T>(string where) where T : class => Context.Set<T>().Where(where);
     public IQueryable<object>? Query(string dbSetName, string where)
     {
         var prop = GetProperty(dbSetName);
-        IQueryable<object>? collection = prop?.GetGetMethod()?.Invoke(_context, null) as IQueryable<object>;
+        IQueryable<object>? collection = prop?.GetGetMethod()?.Invoke(Context, null) as IQueryable<object>;
         return collection?.Where(where);
     }
 

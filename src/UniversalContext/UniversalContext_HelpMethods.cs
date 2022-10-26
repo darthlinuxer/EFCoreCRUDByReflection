@@ -4,10 +4,10 @@ namespace Universal.Context;
 public partial class UniversalContext
 {
 
-    public DbSet<T> DbSet<T>() where T : class => _context.Set<T>();
-    public int Save() => _context.SaveChanges();
-    public async Task<int> SaveAsync() => await _context.SaveChangesAsync();
-    private PropertyInfo? GetProperty(string dbSetName) => _context.GetType().GetProperty(dbSetName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+    public DbSet<T> DbSet<T>() where T : class => Context.Set<T>();
+    public int Save() => Context.SaveChanges();
+    public async Task<int> SaveAsync() => await Context.SaveChangesAsync();
+    private PropertyInfo? GetProperty(string dbSetName) => Context.GetType().GetProperty(dbSetName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
     public static object ConvertTo<T>(JsonElement item) where T : class => item.ToObject<T>(new JsonSerializerOptions()
     {
         PropertyNameCaseInsensitive = true
@@ -18,7 +18,7 @@ public partial class UniversalContext
     });
     public Type DbSetUnderlyingType(string dbSetName)
     {
-        var prop = _context.GetType()
+        var prop = Context.GetType()
                            .GetProperty(dbSetName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
         if (prop is null) throw new Exception("Dbset not found!");
         return prop.PropertyType
@@ -77,7 +77,7 @@ public partial class UniversalContext
         var keyValues = new List<object>();
         if (keyNames is not null)
         {
-            foreach(var keyName in keyNames)
+            foreach (var keyName in keyNames)
             {
                 _ = dict.TryGetValue(keyName, out var value);
                 if (value is not null) keyValues.Add(value);
