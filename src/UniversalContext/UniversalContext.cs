@@ -1,11 +1,43 @@
+using System.Data;
+using System.Data.Common;
 using System.Dynamic;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 
 namespace Universal.Context;
 public partial class UniversalContext
 {
     private readonly DbContext _context;
-    public UniversalContext(DbContext context) => this._context = context;
+    public UniversalContext(DbContext context)
+    {
+        this._context = context;
+    }
+
+//USAGE 
+//var result = Helper.RawSqlQuery(
+//     "SELECT TOP 10 Name, COUNT(*) FROM Users U"
+//     + " INNER JOIN Signups S ON U.UserId = S.UserId"
+//     + " GROUP BY U.Name ORDER BY COUNT(*) DESC",
+//     x => new TopUser { Name = (string)x[0], Count = (int)x[1] });
+    public List<T> RawSqlQuery<T>(string query, Func<DbDataReader, T> map, CommandType commandType = CommandType.Text)
+    {
+        using var context = _context;
+        using var command = context.Database.GetDbConnection().CreateCommand();
+        command.CommandText = query;
+        command.CommandType = commandType;
+
+        context.Database.OpenConnection();
+
+        using var result = command.ExecuteReader();
+        var entities = new List<T>();
+
+        while (result.Read())
+        {
+            entities.Add(map(result));
+        }
+        return entities;
+    }
+
     public object Add<T>(object obj) where T : class
     {
         var convertedObj = (T)obj;

@@ -1,12 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models;
-using Universal.Context;
 using Newtonsoft.Json;
+using Universal.Context;
 
 namespace contexthandler;
 
@@ -46,6 +47,28 @@ public partial class ContextTests
         _context.SaveChanges();
         log.LogInformation("Init called on database db{a}", dbNumber);
         dbNumber++;
+    }
+
+    [TestMethod]
+    public void RawSqlQuery()
+    {
+        var query = "select * from Persons";
+        var results = _service.RawSqlQuery(
+            query,
+            x =>
+            {
+                var obj = new ExpandoObject() as IDictionary<string, object>;
+                var columns = x.GetColumnSchemaAsync().GetAwaiter().GetResult();
+                var i = 0;
+                while (i < columns.Count())
+                {
+                    obj.Add(x.GetName(i), x.GetValue(i));
+                    i++;
+                }
+                return obj;
+            },
+            System.Data.CommandType.Text);
+        Assert.IsNotNull(results);
     }
 
     [TestMethod]
@@ -215,7 +238,7 @@ public partial class ContextTests
     [TestMethod]
     public void Update7()
     {
-        var anakin = new {id=1, Surname="Vader"};
+        var anakin = new { id = 1, Surname = "Vader" };
         var anakinJson = JsonConvert.SerializeObject(anakin);
         using JsonDocument document = JsonDocument.Parse(anakinJson);
         var anakinElement = document.RootElement;
