@@ -1,13 +1,7 @@
-using System.Data;
-using System.Data.Common;
-using System.Dynamic;
-using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
-
 namespace Universal.Context;
 public partial class UniversalContext
 {
-    public DbContext Context {get; init;}
+    public DbContext Context { get; init; }
     public UniversalContext(DbContext context)
     {
         this.Context = context;
@@ -25,17 +19,23 @@ public partial class UniversalContext
         using var command = context.Database.GetDbConnection().CreateCommand();
         command.CommandText = query;
         command.CommandType = commandType;
-
         context.Database.OpenConnection();
-
         using var result = command.ExecuteReader();
         var entities = new List<T>();
 
-        while (result.Read())
-        {
-            entities.Add(map(result));
-        }
+        while (result.Read()) { entities.Add(map(result)); }
         return entities;
+    }
+
+    public DbDataReader RawSqlQuery(string query, CommandType commandType = CommandType.Text)
+    {
+        using var context = Context;
+        using var command = Context.Database.GetDbConnection().CreateCommand();
+        command.CommandText = query;
+        command.CommandType = commandType;
+        context.Database.OpenConnection();
+        using var result = command.ExecuteReader();
+        return result;
     }
 
     public object Add<T>(object obj) where T : class

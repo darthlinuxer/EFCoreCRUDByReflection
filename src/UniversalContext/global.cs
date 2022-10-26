@@ -5,3 +5,7 @@ global using System.Reflection;
 global using System.Text.Json;
 global using Extensions;
 global using Microsoft.EntityFrameworkCore;
+global using System.Data;
+global using System.Data.Common;
+global using System.Dynamic;
+global using Newtonsoft.Json;
