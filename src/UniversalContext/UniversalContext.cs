@@ -13,13 +13,7 @@ public partial class UniversalContext
         this.Context = context;
     }
 
-    //USAGE 
-    //var result = Helper.RawSqlQuery(
-    //     "SELECT TOP 10 Name, COUNT(*) FROM Users U"
-    //     + " INNER JOIN Signups S ON U.UserId = S.UserId"
-    //     + " GROUP BY U.Name ORDER BY COUNT(*) DESC",
-    //     x => new TopUser { Name = (string)x[0], Count = (int)x[1] });
-    public List<T> RawSqlQuery<T>(string query, Func<DbDataReader, T> map, CommandType commandType = CommandType.Text)
+      public List<T> RawSqlQuery<T>(string query, Func<DbDataReader, T> map, CommandType commandType = CommandType.Text)
     {
         using var context = Context;
         using var command = context.Database.GetDbConnection().CreateCommand();
@@ -35,6 +29,7 @@ public partial class UniversalContext
         {
             entities.Add(map(result));
         }
+        context.Database.CloseConnection();
         return entities;
     }
 
