@@ -10,7 +10,7 @@ public static partial class JsonExtensions
             element.WriteTo(writer);
         }
 
-        return JsonSerializer.Deserialize<T>(bufferWriter.WrittenSpan, options);
+        return System.Text.Json.JsonSerializer.Deserialize<T>(bufferWriter.WrittenSpan, options);
     }
 
     public static T ToObject<T>(this JsonDocument document, JsonSerializerOptions options = null)
@@ -31,7 +31,7 @@ public static partial class JsonExtensions
             element.WriteTo(writer);
         }
 
-        return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, returnType, options);
+        return System.Text.Json.JsonSerializer.Deserialize(bufferWriter.WrittenSpan, returnType, options);
     }
 
     public static object ToObject(this JsonDocument document, Type returnType, JsonSerializerOptions options = null)
