@@ -7,7 +7,15 @@ public partial class UniversalContext
         this.Context = context;
     }
 
-      public List<T> RawSqlQuery<T>(string query, Func<DbDataReader, T> map, CommandType commandType = CommandType.Text)
+    public IQueryable<object>? Query<T>(string where) where T : class => Context.Set<T>().Where(where);
+    public IQueryable<object>? Query(string dbSetName, string where)
+    {
+        var prop = GetProperty(dbSetName);
+        IQueryable<object>? collection = prop?.GetGetMethod()?.Invoke(Context, null) as IQueryable<object>;
+        return collection?.Where(where);
+    }
+
+    public List<T> RawSqlQuery<T>(string query, Func<DbDataReader, T> map, CommandType commandType = CommandType.Text)
     {
         using var context = Context;
         context.Database.OpenConnection();
@@ -46,21 +54,6 @@ public partial class UniversalContext
         if (dbSetType is null) throw new Exception("DbSet type cannot be null!");
         var convertedObj = Convert.ChangeType(obj, dbSetType);
         Context.Add(convertedObj);
-        return convertedObj;
-    }
-    public async Task<object> AddAsync<T>(object obj) where T : class
-    {
-        var convertedObj = (T)obj;
-        await Context.AddAsync(convertedObj);
-        return convertedObj;
-    }
-
-    public async Task<object> AddAsync(string dbSetName, object obj)
-    {
-        var dbSetType = DbSetUnderlyingType(dbSetName);
-        if (dbSetType is null) throw new Exception("DbSet type cannot be null!");
-        var convertedObj = Convert.ChangeType(obj, dbSetType);
-        await Context.AddAsync(convertedObj);
         return convertedObj;
     }
     public object Remove<T>(object obj) where T : class
@@ -296,13 +289,6 @@ public partial class UniversalContext
     {
         var prop = GetProperty(dbSetName);
         return prop?.GetGetMethod()?.Invoke(Context, null) as IQueryable<object>;
-    }
-    public IQueryable<object>? Query<T>(string where) where T : class => Context.Set<T>().Where(where);
-    public IQueryable<object>? Query(string dbSetName, string where)
-    {
-        var prop = GetProperty(dbSetName);
-        IQueryable<object>? collection = prop?.GetGetMethod()?.Invoke(Context, null) as IQueryable<object>;
-        return collection?.Where(where);
     }
 
 }
