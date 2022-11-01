@@ -9,12 +9,14 @@
   <ItemGroup>
     <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.22" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="6.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="serilog" Version="2.12.0" />
+    <PackageReference Include="serilog.sinks.console" Version="4.1.0" />
+    <PackageReference Include="serilog.sinks.file" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

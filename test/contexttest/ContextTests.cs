@@ -1,39 +1,44 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Core;
 using Universal.Context;
 
 namespace contexthandler;
 
-[TestClass]
 public partial class ContextTests
 {
     private Context _context;
     private UniversalContext _service;
     static int dbNumber;
-    private readonly ILogger log;
-    private readonly ILoggerFactory logFactory;
+    private readonly Logger _log = new LoggerConfiguration()
+             .Enrich.WithProperty("Version", "1.0.0")
+             .Enrich.FromLogContext()
+             .MinimumLevel.ControlledBy(levelSwitch: new LoggingLevelSwitch()
+             {
+                 MinimumLevel = Serilog.Events.LogEventLevel.Verbose
+             })
+             .WriteTo.Console()
+             .WriteTo.File(Directory.GetCurrentDirectory()+"log.txt")
+             .CreateLogger();
     public ContextTests()
     {
-        logFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Debug);
-        });
-        log = this.logFactory.CreateLogger<ContextTests>();
+       
     }
 
     [TestInitialize]
     public void TestInitialization()
     {
         _context = new Context($"db{dbNumber}");
-        _service = new UniversalContext(_context);
+        _service = new UniversalContext(_context, _log);
         _context.Persons.AddRange(new Person[]
         {
             new Person(){Name="Anakin",Surname="SkyWalker"},
@@ -45,31 +50,32 @@ public partial class ContextTests
             new PersonWithoutKey(){Name="Luke", Surname="SkyWalker"}
        });
         _context.SaveChanges();
-        log.LogInformation("Init called on database db{a}", dbNumber);
         dbNumber++;
     }
-
-    [TestMethod]
-    public void RawSqlQuery()
-    {
-        var query = "select * from Persons";
-        var results = _service.RawSqlQuery(
-            query,
-            x =>
-            {
-                var obj = new ExpandoObject() as IDictionary<string, object>;
-                var columns = x.GetColumnSchemaAsync().GetAwaiter().GetResult();
-                var i = 0;
-                while (i < columns.Count())
-                {
-                    obj.Add(x.GetName(i), x.GetValue(i));
-                    i++;
-                }
-                return obj;
-            },
-            System.Data.CommandType.Text);
-        Assert.IsNotNull(results);
-    }
+    
+    //TEST WON´T WORK WITH INMEMORY COLLECTIONS
+    //UNCOMMENT AND RUN TEST WITH A REAL DATABASE
+    // [TestMethod]
+    // public void RawSqlQuery()
+    // {
+    //     var query = "select * from Persons";
+    //     var results = _service.RawSqlQuery(
+    //         query,
+    //         x =>
+    //         {
+    //             var obj = new ExpandoObject() as IDictionary<string, object>;
+    //             var columns = x.GetColumnSchemaAsync().GetAwaiter().GetResult();
+    //             var i = 0;
+    //             while (i < columns.Count())
+    //             {
+    //                 obj.Add(x.GetName(i), x.GetValue(i));
+    //                 i++;
+    //             }
+    //             return obj;
+    //         },
+    //         System.Data.CommandType.Text);
+    //     Assert.IsNotNull(results);
+    // }
 
     [TestMethod]
     public void Add()
@@ -252,18 +258,31 @@ public partial class ContextTests
         Assert.IsTrue(updatedPerson!.Surname == "Vader");
     }
 
-
     [TestMethod]
     public void Query()
     {
-        var lukeQuery = _service.Query<Person>("Name == \"Luke\"");
-        Assert.IsTrue(lukeQuery!.Count() == 1);
+        var persons = _service.Query<Person>();
+        Assert.IsTrue(persons!.Count() == 2);
     }
 
     [TestMethod]
     public void Query2()
     {
-        var lukeQuery = _service.Query("Persons", "Name == \"Luke\"");
+        var persons = _service.Query("Persons");
+        Assert.IsTrue(persons!.Count() == 2);
+    }
+
+    [TestMethod]
+    public void QueryFiltered1()
+    {
+        var lukeQuery = _service.QueryFiltered<Person>("Name == \"Luke\"");
+        Assert.IsTrue(lukeQuery!.Count() == 1);
+    }
+
+    [TestMethod]
+    public void QueryFiltered2()
+    {
+        var lukeQuery = _service.QueryFiltered("Persons", "Name == \"Luke\"");
         Assert.IsTrue(lukeQuery!.Count() == 1);
     }
 
@@ -279,6 +298,20 @@ public partial class ContextTests
     {
         var collection = _service.GetAll("Persons");
         Assert.IsTrue(collection?.Count() == 2);
+    }
+
+    [TestMethod]
+    public void GetAllTypedFilteredPaginated()
+    {
+        var collection = _service.GetAll<Person>("Name == \"Luke\"", "Name", 1, 10, true);
+        Assert.IsTrue(collection?.First().Name == "Luke");
+    }
+
+    [TestMethod]
+    public void GetAllFilteredPaginated()
+    {
+        var collection = _service.GetAll("Persons", "Name == \"Luke\"", "Name", 1, 10, true);
+        Assert.IsTrue((collection?.First() as Person).Name == "Luke");
     }
 
     [TestMethod]

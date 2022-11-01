@@ -8,19 +8,22 @@
     <IsPackable>true</IsPackable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>Universal.Context</PackageId>
-    <Version>1.0.23</Version>
+    <Version>1.1.2</Version>
     <Authors>Camilo Chaves</Authors>
     <Title>UniversalContext</Title>
     <Description>
       This library enables the user to work with any Context. The advantage is to enable the possibility to perform CRUDs on any DbSet by calling it with a string name.
       See more notes on https://github.com/camilochaves/EFCoreCRUDByReflection.git
-      Where conditions are based on System.Linq.Dynamic.Core package!
+      Note: Where conditions are based on System.Linq.Dynamic.Core package!
+      On this version:
+      1. Added new constructor for Serilog injection
     </Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.22" />
     <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
+    <PackageReference Include="serilog" Version="2.12.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.20" />
   </ItemGroup>
 
