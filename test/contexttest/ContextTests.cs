@@ -27,11 +27,11 @@ public partial class ContextTests
                  MinimumLevel = Serilog.Events.LogEventLevel.Verbose
              })
              .WriteTo.Console()
-             .WriteTo.File(Directory.GetCurrentDirectory()+"log.txt")
+             .WriteTo.File(Directory.GetCurrentDirectory() + "log.txt")
              .CreateLogger();
     public ContextTests()
     {
-       
+
     }
 
     [TestInitialize]
@@ -41,18 +41,40 @@ public partial class ContextTests
         _service = new UniversalContext(_context, _log);
         _context.Persons.AddRange(new Person[]
         {
-            new Person(){Name="Anakin",Surname="SkyWalker"},
-            new Person(){Name="Luke", Surname="SkyWalker"}
+            new Person(){
+                Name="Anakin",
+                Surname="SkyWalker",
+                Address = new PersonAddress
+                {
+                    Address1 = "Hut 10",
+                    City="Capitol",
+                    Zip="Globular Cluster AKX1001 - Tatooine Planet"
+                },
+                Books = new Book[]
+                {
+                    new Book(){Name = "The Jedi Pride"},
+                    new Book(){Name = "The Hidden power of the Dark side"},
+                    new Book(){Name = "Sith lives matter"}
+                }},
+            new Person(){
+                Name="Luke",
+                Surname="SkyWalker",
+                Address = new PersonAddress
+                {
+                    Address1 = "Desert Farm",
+                    City="Capitol",
+                    Zip="Globular Cluster AKX1001 - Tatooine Planet"
+                }}
         });
         _context.PersonsWithoutKey.AddRange(new PersonWithoutKey[]
        {
-            new PersonWithoutKey(){Name="Anakin",Surname="SkyWalker"},
-            new PersonWithoutKey(){Name="Luke", Surname="SkyWalker"}
-       });
+            new PersonWithoutKey() { Name = "Anakin",Surname = "SkyWalker"},
+            new PersonWithoutKey() { Name = "Luke", Surname = "SkyWalker"}
+        });
         _context.SaveChanges();
         dbNumber++;
     }
-    
+
     //TEST WON´T WORK WITH INMEMORY COLLECTIONS
     //UNCOMMENT AND RUN TEST WITH A REAL DATABASE
     // [TestMethod]
@@ -166,7 +188,7 @@ public partial class ContextTests
     public void Update2()
     {
         Person anakin = _service.Get("Persons", "Name == \"Anakin\"") as Person;
-        Person vader = new() { id = anakin!.id, Surname = "Vader" };
+        Person vader = new() { Id = anakin!.Id, Surname = "Vader" };
         var updatedPerson = _service.Update("Persons", vader) as Person;
         _service.Save();
         var vaderInDb = _service.Get("Persons", "Surname == \"Vader\"");

@@ -8,7 +8,7 @@
     <IsPackable>true</IsPackable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>Universal.Context</PackageId>
-    <Version>1.1.2</Version>
+    <Version>1.1.4</Version>
     <Authors>Camilo Chaves</Authors>
     <Title>UniversalContext</Title>
     <Description>
@@ -16,7 +16,7 @@
       See more notes on https://github.com/camilochaves/EFCoreCRUDByReflection.git
       Note: Where conditions are based on System.Linq.Dynamic.Core package!
       On this version:
-      1. Added new constructor for Serilog injection
+      1. Added Includes on GetAsync, GetAllAsync, GetFilteredAsync, GetAllFilteredAsync
     </Description>
   </PropertyGroup>
 

@@ -79,7 +79,7 @@ public partial class ContextTests
     }
 
     [TestMethod]
-    public async Task GetAllAsync()
+    public async Task GetAllAsyncTyped()
     {
         var collection = _service.GetAllAsync<Person>("id", 1, 10, true);
         var counter = 0;
@@ -91,6 +91,24 @@ public partial class ContextTests
     }
 
     [TestMethod]
+    public async Task GetAllAsyncTypedWithIncludes()
+    {
+        var collection = _service.GetAllAsync<Person>("id", 1, 10, true, true, "Books");
+        var counter = 0;
+        bool thereIsAnAnakinPerson = false;
+        bool whoReadThreeBooks = false;
+        await foreach (var person in collection)
+        {
+            if (person.Name == "Anakin") thereIsAnAnakinPerson = true;
+            if (person.Books?.Count == 3) whoReadThreeBooks = true;
+            counter++;
+        }
+        Assert.IsTrue(counter == 2);
+        Assert.IsTrue(thereIsAnAnakinPerson);
+        Assert.IsTrue(whoReadThreeBooks);
+    }
+
+    [TestMethod]
     public async Task GetAsyncTyped()
     {
         var luke = await _service.GetAsync<Person>(c => c.Name == "Luke", CancellationToken.None);
@@ -98,10 +116,27 @@ public partial class ContextTests
     }
 
     [TestMethod]
+    public async Task GetAsyncTypedWithIncludes()
+    {
+        var anakin = await _service.GetAsync<Person>(c => c.Name == "Anakin", CancellationToken.None, true, "Books", "Address");
+        Assert.IsTrue(anakin.Name == "Anakin");
+        Assert.IsTrue(anakin.Books?.Count == 3);
+        Assert.IsTrue(anakin.Address is not null);
+    }
+
+    [TestMethod]
     public async Task GetAsync()
     {
         object? luke = await _service.GetAsync("Persons", "Name==\"Luke\"", CancellationToken.None);
         Assert.IsTrue((luke as Person)?.Name == "Luke");
+    }
+
+    [TestMethod]
+    public async Task GetAsyncWithIncludes()
+    {
+        object? anakin = await _service.GetAsync("Persons", "Name==\"Anakin\"", CancellationToken.None, asNoTracking: true, "Books", "Address");
+        Assert.IsTrue((anakin as Person)?.Name == "Anakin");
+        Assert.IsTrue((anakin as Person)?.Address?.City == "Capitol");
     }
 
     [TestMethod]
@@ -115,12 +150,34 @@ public partial class ContextTests
     }
 
     [TestMethod]
+    public async Task GetFilteredTypeAsyncWithIncludes()
+    {
+        var personCollectionAsyncEnumerable = _service.GetAllFilteredAsync<Person>(where: "Name==\"Anakin\"", orderby: "Name", page: 1, count: 10, descending: true, asNoTracking: true, includeNavigationNames: "Books");
+        await foreach (var person in personCollectionAsyncEnumerable)
+        {
+            Assert.IsTrue(person.Books?.Count == 3);
+            Assert.IsTrue(person.Name == "Anakin");
+        }
+    }
+
+    [TestMethod]
     public async Task GetFilteredType()
     {
         var personCollectionAsyncEnumerable = _service.GetAllFilteredAsync(dbSetName: "Persons", where: "Name==\"Luke\"", orderby: "Name", page: 1, count: 10, descending: true);
         await foreach (var person in personCollectionAsyncEnumerable)
         {
             Assert.IsTrue((person as Person).Name == "Luke");
+        }
+    }
+
+    [TestMethod]
+    public async Task GetFilteredTypeWithIncludes()
+    {
+        var personCollectionAsyncEnumerable = _service.GetAllFilteredAsync(dbSetName: "Persons", where: "Name==\"Anakin\"", orderby: "Name", page: 1, count: 10, descending: true, asNoTracking: true, includeNavigationNames: "Books");
+        await foreach (var person in personCollectionAsyncEnumerable)
+        {
+            Assert.IsTrue((person as Person).Books?.Count == 3);
+            Assert.IsTrue((person as Person).Name == "Anakin");
         }
     }
 
