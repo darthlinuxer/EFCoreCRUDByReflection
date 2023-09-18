@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Universal.Context;
 public partial class UniversalContext
 {
@@ -99,7 +101,7 @@ public partial class UniversalContext
             var pred = p.Compile();
             var mainQuery = Context.Set<T>().Where(p);
             if (asNoTracking) mainQuery = mainQuery.AsNoTracking();
-            if (includeNavigationNames.Length > 0) foreach(var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
             var result = await mainQuery.SingleOrDefaultAsync(ct);
             _log?.Debug("return: {@a}", result);
             return result;
@@ -118,7 +120,7 @@ public partial class UniversalContext
         {
             var mainQuery = QueryFiltered(dbSetName, where);
             if (asNoTracking) mainQuery = mainQuery.AsNoTracking<object>();
-            if (includeNavigationNames.Length > 0) foreach(var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
             var result = await mainQuery?.SingleOrDefaultAsync(ct);
             _log?.Debug("return: {@a}", result);
             return result;
@@ -138,7 +140,7 @@ public partial class UniversalContext
             string direction = descending ? "desc" : "asc";
             var mainQuery = Query(dbSetName)?.OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
             if (asNoTracking) mainQuery = mainQuery?.AsNoTracking();
-            if (includeNavigationNames.Length > 0) foreach(var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
             var result = mainQuery?.AsAsyncEnumerable();
             _log?.Debug("return: {@a}", result);
             return result;
@@ -158,8 +160,48 @@ public partial class UniversalContext
             string direction = descending ? "desc" : "asc";
             var mainQuery = Context.Set<T>().OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
             if (asNoTracking) mainQuery = mainQuery?.AsNoTracking();
-            if (includeNavigationNames.Length > 0) foreach(var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
             var result = mainQuery?.AsAsyncEnumerable();
+            _log?.Debug("return: {@a}", result);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+
+    public ConfiguredCancelableAsyncEnumerable<object?> GetAllCancellableAsync(string dbSetName, string orderby, int page, int count, bool descending, CancellationToken ct, bool asNoTracking = true, params string[] includeNavigationNames)
+    {
+        _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+        try
+        {
+            string direction = descending ? "desc" : "asc";
+            var mainQuery = Query(dbSetName)!.OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
+            if (asNoTracking) mainQuery = mainQuery!.AsNoTracking();
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            var result = mainQuery!.AsAsyncEnumerable().WithCancellation(ct);
+            _log?.Debug("return: {@a}", result);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+
+    public ConfiguredCancelableAsyncEnumerable<T?> GetAllCancellableAsync<T>(string orderby, int page, int count, bool descending, CancellationToken ct, bool asNoTracking = true, params string[] includeNavigationNames) where T : class
+    {
+        _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+        try
+        {
+            string direction = descending ? "desc" : "asc";
+            var mainQuery = Context.Set<T>().OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
+            if (asNoTracking) mainQuery = mainQuery!.AsNoTracking();
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery!.Include(navigation);
+            var result = mainQuery.AsAsyncEnumerable().WithCancellation(ct);
             _log?.Debug("return: {@a}", result);
             return result;
         }
@@ -178,7 +220,7 @@ public partial class UniversalContext
             string direction = descending ? "desc" : "asc";
             var mainQuery = Context.Set<T>().Where(where).OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
             if (asNoTracking) mainQuery = mainQuery?.AsNoTracking();
-            if (includeNavigationNames.Length > 0) foreach(var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
             var result = mainQuery?.AsAsyncEnumerable();
             _log?.Debug("return: {@a}", result);
             return result;
@@ -190,7 +232,6 @@ public partial class UniversalContext
         }
     }
 
-
     public IAsyncEnumerable<object>? GetAllFilteredAsync(string dbSetName, string where, string orderby, int page, int count, bool descending, bool asNoTracking = true, params string[] includeNavigationNames)
     {
         _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
@@ -199,8 +240,50 @@ public partial class UniversalContext
             string direction = descending ? "desc" : "asc";
             var mainQuery = QueryFiltered(dbSetName, where)?.OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
             if (asNoTracking) mainQuery = mainQuery?.AsNoTracking();
-            if (includeNavigationNames.Length > 0) foreach(var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
             var result = mainQuery?.AsAsyncEnumerable();
+            _log?.Debug("return: {@a}", result);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+
+    public ConfiguredCancelableAsyncEnumerable<T?> GetAllFilteredCancellableAsync<T>(string where, string orderby, int page, int count, bool descending, CancellationToken ct, bool asNoTracking = true, params string[] includeNavigationNames) where T : class
+    {
+        _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+        try
+        {
+            string direction = descending ? "desc" : "asc";
+            var mainQuery = Context.Set<T>().Where(where).OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
+            if (asNoTracking) mainQuery = mainQuery.AsNoTracking();
+            if (includeNavigationNames.Length > 0) foreach (var navigation in includeNavigationNames) mainQuery = mainQuery.Include(navigation);
+            var result = mainQuery.AsAsyncEnumerable().WithCancellation(ct);
+            _log?.Debug("return: {@a}", result);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+
+    public ConfiguredCancelableAsyncEnumerable<object?> GetAllFilteredCancellableAsync(string dbSetName, string where, string orderby, int page, int count, bool descending, CancellationToken ct, bool asNoTracking = true, params string[] includeNavigationNames)
+    {
+        _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+        try
+        {
+            string direction = descending ? "desc" : "asc";
+            var mainQuery = QueryFiltered(dbSetName, where)?.OrderBy($"{orderby} {direction}").Skip((page - 1) * count).Take(count);
+            if (asNoTracking) mainQuery = mainQuery.AsNoTracking();
+            if (includeNavigationNames.Length > 0)
+                foreach (var navigation in includeNavigationNames)
+                    mainQuery = mainQuery.Include(navigation);
+            var result = mainQuery.AsAsyncEnumerable().WithCancellation(ct);
             _log?.Debug("return: {@a}", result);
             return result;
         }

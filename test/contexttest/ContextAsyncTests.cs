@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -180,6 +181,30 @@ public partial class ContextTests
             Assert.IsTrue((person as Person).Name == "Anakin");
         }
     }
+
+    [TestMethod]
+    public async Task GetAllFilteredCancellableTypedAsyncWithIncludes()
+    {
+        var ct = new CancellationToken();
+        var personCollectionAsync = _service.GetAllFilteredCancellableAsync<Person>(
+            where: "Id > 0",
+            orderby: "Name",
+            page: 1,
+            count: 10,
+            descending: true,
+            ct,
+            asNoTracking: true,
+            includeNavigationNames: "Books");
+
+        var personList = new List<Person>();
+        await foreach (var person in personCollectionAsync.WithCancellation(ct))
+        {
+            if(ct.IsCancellationRequested) break;
+            personList.Add(person!);            
+        }
+        Assert.IsTrue(personList.Count==2);
+    }
+
 
     //Anonymous object with null values
     [TestMethod]
