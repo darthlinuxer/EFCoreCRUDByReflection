@@ -15,15 +15,14 @@ public partial class UniversalContext
         try
         {
             _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
-            using var context = Context;
-            context.Database.OpenConnection();
-            using var command = context.Database.GetDbConnection().CreateCommand();
+            Context.Database.OpenConnection();
+            using var command = Context.Database.GetDbConnection().CreateCommand();
             command.CommandText = query;
             command.CommandType = commandType;
             using var result = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, ct);
             var entities = new List<T>();
             while (result.Read()) { entities.Add(map(result)); }
-            context.Database.CloseConnection();
+            Context.Database.CloseConnection();
             _log?.Debug("return: {@a}", entities);
             return entities;
         }
@@ -39,13 +38,12 @@ public partial class UniversalContext
         try
         {
             _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
-            using var context = Context;
-            context.Database.OpenConnection();
+            Context.Database.OpenConnection();
             using var command = Context.Database.GetDbConnection().CreateCommand();
             command.CommandText = query;
             command.CommandType = commandType;
             using var result = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, ct);
-            context.Database.CloseConnection();
+            Context.Database.CloseConnection();
             _log?.Debug("return: {@a}", result);
             return result;
         }

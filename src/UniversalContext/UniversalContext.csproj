@@ -8,7 +8,7 @@
     <IsPackable>true</IsPackable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>Universal.Context</PackageId>
-    <Version>1.2.1</Version>
+    <Version>1.2.1.1</Version>
     <Authors>Camilo Chaves</Authors>
     <Title>UniversalContext</Title>
     <Description>
@@ -16,7 +16,8 @@
       See more notes on https://github.com/camilochaves/EFCoreCRUDByReflection.git
       Note: Where conditions are based on System.Linq.Dynamic.Core package!
       On this version:
-      1. Added Includes on GetAsync, GetAllAsync, GetFilteredAsync, GetAllFilteredAsync
+      1. Added 2 more methods: AddBulk and AddBulkAsync
+      2. Bug fix on method RawSqlQueryAsync that dispose the Context after single use
     </Description>
   </PropertyGroup>
 
