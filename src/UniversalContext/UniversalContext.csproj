@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>Universal.Context</PackageId>
-    <Version>1.1.4</Version>
+    <Version>1.2.1</Version>
     <Authors>Camilo Chaves</Authors>
     <Title>UniversalContext</Title>
     <Description>
@@ -22,9 +22,9 @@
 
   <ItemGroup>
     <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.22" />
-    <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
-    <PackageReference Include="serilog" Version="2.12.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.20" />
+    <PackageReference Include="NewtonSoft.Json" Version="13.0.3" />
+    <PackageReference Include="serilog" Version="3.1.1" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.9" />
   </ItemGroup>
 
 </Project>
