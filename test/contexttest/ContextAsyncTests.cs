@@ -80,6 +80,68 @@ public partial class ContextTests
     }
 
     [TestMethod]
+    public async Task AddBulkAsync_WithKnownTypes()
+    {
+        var leia = new Person() { Name = "Leia", Surname = "Skywalker" };
+        var hanSolo = new Person { Name = "Han", Surname = "Solo"};
+        var itemsToAdd = new List<object>(){
+            leia, hanSolo
+        };
+
+        await _service.AddBulkAsync<Person>(itemsToAdd, CancellationToken.None);
+        await _service.SaveAsync();
+        
+        var persons = _service.GetAllAsync(dbSetName: "Persons", orderby: "Name", page: 1, count: 10, descending: false, asNoTracking: false);
+
+        bool thereIsALeiaPerson = false;
+        bool theNameOfTheAddedPersonIsLeia = false;
+        bool thereIsAHanSoloPerson = false;
+        int personCount = 0;
+        await foreach (var person in persons)
+        {
+            personCount++;
+            if ((Person)person == leia) thereIsALeiaPerson = true;
+            if (((Person)person).Name == "Leia") theNameOfTheAddedPersonIsLeia = true;
+            if (person == hanSolo) thereIsAHanSoloPerson = true;
+        }
+        Assert.IsTrue(personCount == 4);
+        Assert.IsTrue(thereIsALeiaPerson);
+        Assert.IsTrue(theNameOfTheAddedPersonIsLeia);
+        Assert.IsTrue(thereIsAHanSoloPerson);
+    }
+
+     [TestMethod]
+    public async Task AddBulkAsync_WithTypesAsString()
+    {
+        var leia = new Person() { Name = "Leia", Surname = "Skywalker" };
+        var hanSolo = new Person { Name = "Han", Surname = "Solo"};
+        var itemsToAdd = new List<object>(){
+            leia, hanSolo
+        };
+
+        await _service.AddBulkAsync("Persons", itemsToAdd, CancellationToken.None);
+        await _service.SaveAsync();
+        
+        var persons = _service.GetAllAsync(dbSetName: "Persons", orderby: "Name", page: 1, count: 10, descending: false, asNoTracking: false);
+
+        bool thereIsALeiaPerson = false;
+        bool theNameOfTheAddedPersonIsLeia = false;
+        bool thereIsAHanSoloPerson = false;
+        int personCount = 0;
+        await foreach (var person in persons)
+        {
+            personCount++;
+            if ((Person)person == leia) thereIsALeiaPerson = true;
+            if (((Person)person).Name == "Leia") theNameOfTheAddedPersonIsLeia = true;
+            if (person == hanSolo) thereIsAHanSoloPerson = true;
+        }
+        Assert.IsTrue(personCount == 4);
+        Assert.IsTrue(thereIsALeiaPerson);
+        Assert.IsTrue(theNameOfTheAddedPersonIsLeia);
+        Assert.IsTrue(thereIsAHanSoloPerson);
+    }
+
+    [TestMethod]
     public async Task GetAllAsyncTyped()
     {
         var collection = _service.GetAllAsync<Person>("id", 1, 10, true);

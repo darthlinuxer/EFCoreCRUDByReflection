@@ -1,7 +1,3 @@
-using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
-
 namespace Universal.Context;
 public partial class UniversalContext
 {
@@ -150,6 +146,21 @@ public partial class UniversalContext
             Context.Add(convertedObj);
             _log?.Debug("return: {@a}", convertedObj);
             return convertedObj;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+
+     public object Addulk(IList<object> objs)
+    {
+        try
+        {
+            _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+            Context.AddRange(objs);
+            return objs;
         }
         catch (Exception ex)
         {

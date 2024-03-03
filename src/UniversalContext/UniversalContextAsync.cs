@@ -73,6 +73,7 @@ public partial class UniversalContext
             throw;
         }
     }
+
     public async Task<object> AddAsync(string dbSetName, object obj, CancellationToken ct)
     {
         try
@@ -85,6 +86,35 @@ public partial class UniversalContext
             var result = convertedObj;
             _log?.Debug("return: {@a}", result);
             return result;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+
+    public async Task<List<object>> AddBulkAsync(string dbSetName, List<object> objs, CancellationToken ct)
+    {
+        try
+        {
+            _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+            foreach(var obj in objs) await AddAsync(dbSetName, obj, ct);
+            return objs;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, ex);
+            throw;
+        }
+    }
+    public async Task<List<object>> AddBulkAsync<T>(List<object> objs, CancellationToken ct) where T:class
+    {
+        try
+        {
+            _log?.Information("{a}:{b} {@c}", this, MethodBase.GetCurrentMethod()?.Name, MethodBase.GetCurrentMethod()?.GetCustomAttributes());
+            foreach(var obj in objs) await AddAsync<T>(obj, ct);
+            return objs;
         }
         catch (Exception ex)
         {
