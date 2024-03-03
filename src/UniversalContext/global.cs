@@ -9,3 +9,4 @@ global using System.Data;
 global using System.Data.Common;
 global using System.Dynamic;
 global using Newtonsoft.Json;
+global using Serilog.Core;
